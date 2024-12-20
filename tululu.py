@@ -1,5 +1,6 @@
 import requests
 import os
+import argparse
 from requests.exceptions import HTTPError, ConnectionError
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
@@ -46,7 +47,12 @@ def parse_book_page(source):
 
 
 if __name__ == "__main__":
-    for book_id in range(1, 11):
+    parser = argparse.ArgumentParser(
+        description='Скачивает обложки книг и сами книги с сайта "tululu.org"')
+    parser.add_argument('start_id', default=1, type=int, nargs='?')
+    parser.add_argument('end_id', default=10, type=int, nargs='?')
+    args = parser.parse_args()
+    for book_id in range(args.start_id, args.end_id + 1):
         try:
             params = {'id': book_id}
             response_for_txt = requests.get('https://tululu.org/txt.php',
