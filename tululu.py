@@ -3,6 +3,7 @@ import os
 from requests.exceptions import HTTPError, ConnectionError
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
+from urllib.parse import urljoin, urlsplit, unquote
 
 
 def check_for_redirect(response):
@@ -18,11 +19,24 @@ def download_txt(response, filename, folder='books'):
     return filepath
 
 
+def download_image(url, folder='images'):
+    response = requests.get(url)
+    response.raise_for_status()
+    os.makedirs(folder, exist_ok=True)
+    filename = unquote(urlsplit(url).path).split('/').pop()
+    filepath = os.path.join(folder, sanitize_filename(filename))
+    with open(filepath, 'wb') as file:
+        file.write(response.content)
+    return filepath
+
+
 def parse_book_page(source):
     soup = BeautifulSoup(source.text, 'lxml')
     book = {
         'author': soup.find('h1').text.split('::').pop().strip(),
         'title': soup.find('h1').text.split('::')[::-1].pop().strip(),
+        'image_url': urljoin(
+            source.url, soup.find(class_='bookimage').find('img')['src'])
     }
     return book
 
@@ -39,6 +53,7 @@ if __name__ == "__main__":
             response_for_parsing.raise_for_status()
             check_for_redirect(response_for_parsing)
             parsed_book = parse_book_page(response_for_parsing)
+            download_image(parsed_book['image_url'])
             download_txt(response_for_txt,
                          f'{book_id}. {parsed_book['title']}')
         except HTTPError:
