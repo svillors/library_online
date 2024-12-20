@@ -5,6 +5,7 @@ from requests.exceptions import HTTPError, ConnectionError
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 from urllib.parse import urljoin, urlsplit, unquote
+from time import sleep
 
 
 def check_for_redirect(response):
@@ -70,3 +71,4 @@ if __name__ == "__main__":
             print(f'Книга под номером {book_id} не найдена')
         except ConnectionError:
             print('Ошибка соеденения. Повторное соеденение')
+            sleep(5)
