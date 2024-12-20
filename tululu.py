@@ -35,6 +35,8 @@ def parse_book_page(source):
     book = {
         'author': soup.find('h1').text.split('::').pop().strip(),
         'title': soup.find('h1').text.split('::')[::-1].pop().strip(),
+        'comments': [comment.find('span').text for comment in soup.find_all(
+            class_='texts')],
         'image_url': urljoin(
             source.url, soup.find(class_='bookimage').find('img')['src'])
     }
